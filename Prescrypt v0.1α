@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PRESCRYPT v3</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap');
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    background: #0a0a0a;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    font-family: 'Share Tech Mono', monospace;
+  }
+
+  /* 240x320 scaled x2 */
+  .screen {
+    background: #000;
+    border: 2px solid #5B9BD5;
+    width: 480px;
+    height: 640px;
+    box-shadow: 0 0 40px #5B9BD560, 0 0 80px #5B9BD530;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+
+  /* ── HEADER ── */
+  .header {
+    border-bottom: 2px solid #5B9BD5;
+    display: flex;
+    align-items: center;
+    height: 70px;
+    flex-shrink: 0;
+    padding: 0 16px;
+    gap: 12px;
+  }
+  .logo-svg {
+    width: 44px;
+    height: 54px;
+    flex-shrink: 0;
+    filter: drop-shadow(0 0 6px #5B9BD5) drop-shadow(0 0 12px #5B9BD580);
+  }
+  .header-divider {
+    width: 2px;
+    height: 40px;
+    background: #5B9BD5;
+    flex-shrink: 0;
+    box-shadow: 0 0 6px #5B9BD5;
+  }
+  .header-info {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+  .sys-title {
+    color: #5B9BD5;
+    font-size: 15px;
+    letter-spacing: 2px;
+    text-shadow: 0 0 8px #5B9BD5;
+  }
+  .mode-line {
+    display: flex;
+    justify-content: space-between;
+    color: #5B9BD5;
+    font-size: 12px;
+    text-shadow: 0 0 6px #5B9BD5;
+  }
+
+  /* ── CONTENT ── */
+  .content {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 24px 32px;
+    gap: 20px;
+    border-bottom: 2px solid #5B9BD5;
+  }
+  .task-label {
+    font-size: 18px;
+    letter-spacing: 4px;
+    color: #5B9BD5;
+    text-shadow: 0 0 10px #5B9BD5, 0 0 20px #5B9BD560;
+  }
+  .task-text {
+    font-size: 28px;
+    line-height: 1.7;
+    text-align: center;
+    color: #5B9BD5;
+    text-shadow: 0 0 8px #5B9BD5;
+  }
+  .cursor {
+    display: inline-block;
+    width: 10px; height: 20px;
+    background: #5B9BD5;
+    animation: blink 1s step-end infinite;
+    vertical-align: middle;
+    box-shadow: 0 0 8px #5B9BD5;
+  }
+  @keyframes blink {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0; }
+  }
+
+  /* ── FOOTER ── */
+  .footer {
+    height: 58px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 20px;
+    flex-shrink: 0;
+  }
+  .execute {
+    color: #5B9BD5;
+    font-size: 19px;
+    letter-spacing: 2px;
+    text-shadow: 0 0 10px #5B9BD5;
+    animation: pulse 2s ease-in-out infinite;
+  }
+  .timer {
+    color: #5B9BD5;
+    font-size: 22px;
+    letter-spacing: 3px;
+    text-shadow: 0 0 14px #5B9BD5, 0 0 28px #5B9BD560;
+  }
+  @keyframes pulse {
+    0%, 100% { text-shadow: 0 0 10px #5B9BD5; }
+    50% { text-shadow: 0 0 25px #5B9BD5, 0 0 50px #5B9BD560; }
+  }
+
+  .scanline {
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+    background: #5B9BD580;
+    animation: scan 3s linear infinite;
+    pointer-events: none;
+  }
+  @keyframes scan {
+    0%   { top: 0;    opacity: 1;   }
+    100% { top: 100%; opacity: 0.2; }
+  }
+
+  .corner { position: absolute; width: 10px; height: 10px; border-color: #5B9BD5; border-style: solid; }
+  .tl { top: -2px; left: -2px;   border-width: 2px 0 0 2px; }
+  .tr { top: -2px; right: -2px;  border-width: 2px 2px 0 0; }
+  .bl { bottom: -2px; left: -2px;  border-width: 0 0 2px 2px; }
+  .br { bottom: -2px; right: -2px; border-width: 0 2px 2px 0; }
+</style>
+</head>
+<body>
+<div class="screen">
+  <div class="scanline"></div>
+  <div class="corner tl"></div>
+  <div class="corner tr"></div>
+  <div class="corner bl"></div>
+  <div class="corner br"></div>
+
+  <!-- HEADER -->
+  <div class="header">
+        <svg width="44" height="64" viewBox="0 0 44 64" fill="none" xmlns="http://www.w3.org/2000/svg" style="flex-shrink: 0;">
+      <text x="22" y="28" font-family="'Share Tech Mono', monospace" font-size="28" fill="#5B9BD5" text-anchor="middle" style="filter: drop-shadow(0 0 5px #5B9BD5) drop-shadow(0 0 10px #5B9BD580);">❀</text>
+      
+      <g style="filter: drop-shadow(0 0 6px #FFD700) drop-shadow(0 0 14px #FFD70080);">
+        <path d="M 22 34 L 14 43 L 19 43 L 19 56 L 25 56 L 25 43 L 30 43 Z" fill="#111" stroke="#FFD700" stroke-width="2" stroke-linejoin="round"/>
+      </g>
+        </svg>
+
+    <div class="header-divider"></div>
+
+    <div class="header-info">
+      <div class="sys-title" id="headerText">PRESCRYPT_SYS</div>
+      <div class="mode-line">
+        <span id="modeText">&gt; MODE: [SOLO]</span>
+        <span id="versionText">v0.1α</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- CONTENT -->
+  <div class="content">
+    <div class="task-label" id="taskLabel">❀  TASK  ❀</div>
+    <div class="task-text" id="taskText"></div>
+    <div class="cursor"></div>
+  </div>
+
+  <!-- FOOTER -->
+  <div class="footer">
+    <span class="execute" id="executeText">[ STATUS: EXECUTE ]</span>
+    <span class="timer" id="timerText">00:30</span>
+  </div>
+</div>
+
+<script>
+  const BLUE       = '#5B9BD5';
+  const GLITCH_COL = ['#FF2222', '#CC00FF'];
+  const allChars    = '!@#$%^&*?><[]{}|ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+  const digitsOnly  = '0123456789';
+  const alphaDigits = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+
+  const TASKS = [
+    'WALK BACKWARDS\nFOR 10 STEPS',
+    'COMPLIMENT\nA STRANGER',
+    'STARE AT THE\nCEILING 30 SEC',
+    'MAKE SOMEONE\nSAY YOUR NAME',
+    'STAY SILENT\nFOR 5 MINUTES',
+    'WAVE AT SOMEONE\nWHO IGNORES YOU',
+  ];
+  let taskIndex = 0;
+
+  function pick(pool) { return pool[Math.floor(Math.random() * pool.length)]; }
+  function charPool(ch) {
+    if (/[0-9]/.test(ch)) return digitsOnly;
+    if (/α/.test(ch))     return alphaDigits;
+    return allChars;
+  }
+
+  function decipher(el, text) {
+    const letters = text.split('');
+    const total   = letters.length;
+    const totalMs = Math.max(900, 2400 - total * 55);
+    const perChar = totalMs / Math.max(total, 1);
+    let settled   = 0;
+    let display   = letters.map(c => (c === '\n' || c === ' ') ? c : pick(allChars));
+    el.innerHTML  = display.join('').replace(/\n/g, '<br>');
+    const iv = setInterval(() => {
+      if (settled >= total) { clearInterval(iv); el.innerHTML = text.replace(/\n/g, '<br>'); return; }
+      for (let i = settled; i < total; i++) {
+        display[i] = (letters[i] === '\n' || letters[i] === ' ') ? letters[i] : pick(allChars);
+      }
+      display[settled] = letters[settled];
+      settled++;
+      el.innerHTML = display.join('').replace(/\n/g, '<br>');
+    }, perChar);
+  }
+
+  let timeLeft = 30;
+  function pad(n) { return String(n).padStart(2, '0'); }
+  function formatTime(s) { return pad(Math.floor(s/60)) + ':' + pad(s%60); }
+  function nextTask() {
+    taskIndex = (taskIndex + 1) % TASKS.length;
+    decipher(document.getElementById('taskText'), TASKS[taskIndex]);
+    timeLeft = 30;
+  }
+  function tickTimer() {
+    document.getElementById('timerText').innerText = formatTime(timeLeft);
+    if (timeLeft <= 0) nextTask(); else timeLeft--;
+  }
+
+  window.addEventListener('load', () => {
+    setTimeout(() => decipher(document.getElementById('taskText'), TASKS[taskIndex]), 400);
+    document.getElementById('timerText').innerText = formatTime(timeLeft);
+    setInterval(tickTimer, 1000);
+  });
+
+  const glitchTargets = [
+    { id: 'taskText',    isHTML: true  },
+    { id: 'headerText',  isHTML: false },
+    { id: 'modeText',    isHTML: false },
+    { id: 'versionText', isHTML: false },
+    { id: 'taskLabel',   isHTML: false },
+    { id: 'executeText', isHTML: false },
+  ];
+
+  function glitchElement(el, isHTML) {
+    const original = el.innerText;
+    const arr = original.split('');
+    let idx, tries = 0;
+    do { idx = Math.floor(Math.random() * arr.length); tries++; }
+    while ((arr[idx] === ' ' || arr[idx] === '\n') && tries < 20);
+    if (arr[idx] === ' ' || arr[idx] === '\n') return;
+    const saved = arr[idx];
+    const col   = pick(GLITCH_COL);
+    arr[idx]    = pick(charPool(saved));
+    el.style.color      = col;
+    el.style.textShadow = `0 0 12px ${col}, 0 0 25px ${col}90`;
+    if (isHTML) el.innerHTML = arr.join('').replace(/\n/g, '<br>');
+    else        el.innerText = arr.join('');
+    setTimeout(() => {
+      arr[idx] = saved;
+      el.style.color      = BLUE;
+      el.style.textShadow = `0 0 8px ${BLUE}`;
+      if (isHTML) el.innerHTML = arr.join('').replace(/\n/g, '<br>');
+      else        el.innerText = arr.join('');
+    }, 2000);
+  }
+
+  function scheduleGlitch() {
+    const delay = (10 + Math.random() * 5) * 1000;
+    setTimeout(() => {
+      const t = pick(glitchTargets);
+      const el = document.getElementById(t.id);
+      if (el) glitchElement(el, t.isHTML);
+      scheduleGlitch();
+    }, delay);
+  }
+  scheduleGlitch();
+</script>
+</body>
+</html>
