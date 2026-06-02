@@ -1,4 +1,4 @@
-# The-prescript-v0.1α
+# The-prescrypt-v0.1α
 
 # PRESCRYPT v0.1α ❀
 
